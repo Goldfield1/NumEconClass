@@ -228,16 +228,26 @@ class ConsModelExam():
         ys_typ1 = np.random.choice([y2_low, y2_high], p=[par.prb[1]['low'], par.prb[1]['high']], size=par.simN)
         ys_typ2 = np.random.choice([y2_low, y2_high], p=[par.prb[2]['low'], par.prb[2]['high']], size=par.simN)
         ys = {1: ys_typ1, 2: ys_typ2}
-
+    
         for t in range(0,2):
+            c_interp_1 = interpolate.RegularGridInterpolator([par.m_grid], sol.c[t,0,:],
+                                                bounds_error=False, fill_value=None)
+            c_interp_2 = interpolate.RegularGridInterpolator([par.m_grid], sol.c[t,1,:],
+                                                bounds_error=False, fill_value=None)
+            
             for n in range(0,par.simN):
                 _type = sim.types[n]
 
                 # b. Construct interpolaters between cash and consumption choices
                 # we have to interpolate, since ACTUAL levels of wealth may not lie on the grid
-                c_interp = interpolate.RegularGridInterpolator([par.m_grid], sol.c[t,_type-1,:],
-                                                                bounds_error=False, fill_value=None)
+                #c_interp = interpolate.RegularGridInterpolator([par.m_grid], sol.c[t,_type-1,:],
+                #                                                bounds_error=False, fill_value=None)
                 
+                if _type == 1:
+                    c_interp = c_interp_1
+                else:
+                    c_interp = c_interp_2
+                    
                 #print(sim.m[t,n])
                 # c. Simulate period 1 based on array of m and solution
                 sim.c[t,n] = c_interp([sim.m[t,n]])[0] # index 0 since we only have one element to get out
